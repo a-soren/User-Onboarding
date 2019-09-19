@@ -1,13 +1,21 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { withFormik, Form, Field }from 'formik';
 import * as Yup from 'yup';
 import Axios from 'axios';
 
-function InputForm({ values, errors, touched}){
+function InputForm({ values, errors, touched, status}){
+    const [users, setUsers]=useState([]);
+    useEffect(()=>{
+        if (status){
+            setUsers([...users, status])
+        }
+
+    }, [status])
     return(
-        <Form>
+        <div>
+            <Form>
             <div>
-                {/* {touched.name && errors.name && <p>{errors.name}</p>} */}
+                {touched.name && errors.name && <p>{errors.name}</p>}
                 <label>
                      Name:
                     <Field
@@ -21,7 +29,7 @@ function InputForm({ values, errors, touched}){
             
                 
             <div>
-                {/* {touched.email && errors.email && <p>{errors.email}</p>} */}
+                {touched.email && errors.email && <p>{errors.email}</p>}
                 <label>
                     Email:
                     <Field
@@ -33,7 +41,7 @@ function InputForm({ values, errors, touched}){
             </div>
 
            <div>
-               {/* {touched.errors && errors.password && <p>{errors.password}</p>} */}
+               {touched.errors && errors.password && <p>{errors.password}</p>}
                 <label>
                     Password:
                     <Field
@@ -54,7 +62,16 @@ function InputForm({ values, errors, touched}){
             </label>
             
             <button type='submit'>Submit</button>
-        </Form>
+            </Form>
+        {users.map(user=>(
+            <ul key={user.id}>
+                <li key={user.name}>Name:{user.name}</li>
+                <li key={user.email}>Email:{user.email}</li>
+                <li key={user.password}>Password:{user.password}</li>
+            </ul>
+        ))}
+        </div>
+        
     )
 }
 
@@ -80,12 +97,15 @@ const InputFormApp = withFormik({
 
     }),
 
-    handleSubmit(values, {}){
+    handleSubmit(values, {setStatus}){
         console.log(values);
         Axios
         .post('https://reqres.in/api/users', values)
         .then(res=>{
-            console.log(res) 
+            setStatus(res.data); 
+        })
+        .catch(err=>{
+            console.log(err.res);
         })
     }
 
